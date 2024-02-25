@@ -1,3 +1,4 @@
+#include <cstring>
 #include <stdio.h>
 #include <termios.h>
 #define SIZE 3
@@ -52,10 +53,10 @@ struct Player
 
 typedef struct
 {
-
-   int stage;
-   int double_stage;
-   tile_plants type;
+    int water;
+    int stage;
+    int double_stage;
+    tile_plants type;
 
 } plants;
 
@@ -77,6 +78,14 @@ int main()
             world[i][j].plant.type = tile_plants::none;
             world[i][j].plant.stage = 0;
             world[i][j].plant.double_stage = 0;
+        }
+    }
+    
+    for (int i=0; i<SIZE; i++)
+    {
+        for (int j=0; j<SIZE; j++)
+        {
+            world[i][j].plant.water=0;
         }
     }
 
@@ -122,7 +131,15 @@ int main()
             }
             printf("\n");
         }
-
+        printf("\nWATER\n");
+        for (int i=0; i<SIZE; i++)
+        {
+            for (int j=0; j<SIZE; j++)
+            {
+                printf("%d", world[i][j].plant.water);
+            }
+            printf("\n");
+        }
         printf("\nTILES\n");
         for (int i=0; i<SIZE; i++)
         {
@@ -218,8 +235,41 @@ int main()
                 printf("r - refill watering can\n"); // TO DO
                 printf("w - water crop with watering can\n"); // TO DO
                 break;
+            case 'g':
+                player.inventory[(int)items::watering_can_with_water]++;
+                break;
+            case 'r':
+                if (player.inventory[(int)items::watering_can_without_water])
+                {
+                    player.inventory[(int)items::watering_can_with_water]++;
+                    player.inventory[(int)items::watering_can_without_water]--;
+                }
+                else
+                {
+                    printf("You need a watering can!\n");
+                }
+                break;
             case 'q':
                 return 0;
+            case 'w':
+                printf("x: ");
+                y = (getchar()-'0');
+                printf("\ny: ");
+                x = (getchar()-'0');
+                if (x >= SIZE || y >= SIZE || y < 0 || x < 0) 
+                {
+                    printf("\nNah, didn't water, too far away\n");
+                    break;
+                } 
+                if (!player.inventory[(int)items::watering_can_with_water])
+                {
+                    printf("\nNah, didn't water, you don't have watering can with water\n");
+                    break;
+                }
+                world[x][y].plant.water=10;
+                player.inventory[(int)items::watering_can_with_water]--;
+                player.inventory[(int)items::watering_can_without_water]++;
+                break;
             case 'p':
                 printf("x: ");
                 y = (getchar()-'0');
@@ -281,61 +331,65 @@ int main()
         {
             for (int j = 0; j < SIZE; j++)
             {
-                // Melon Growing
-                if (world[i][j].plant.type == tile_plants::melon_crop)
+                if (world[i][j].plant.water)
                 {
-                    world[i][j].plant.stage++;
-                }
-                if (world[i][j].plant.stage == 10 && world[i][j].plant.type == tile_plants::melon_crop)
-                {
-                    world[i][j].plant.stage=9;
-                    if (world[i][j].plant.double_stage > 5 && world[i][j].plant.stage==9)
+                    // Melon Growing
+                    if (world[i][j].plant.type == tile_plants::melon_crop)
                     {
-                        world[i][j].plant.double_stage=0;
-                        world[i][j].type=tiles::melon;
+                        world[i][j].plant.stage++;
                     }
-                    else if (world[i][j].plant.stage==9 && world[i][j].type!=tiles::melon)
+                    if (world[i][j].plant.stage == 10 && world[i][j].plant.type == tile_plants::melon_crop)
                     {
-                        world[i][j].plant.double_stage++;
+                        world[i][j].plant.stage=9;
+                        if (world[i][j].plant.double_stage > 5 && world[i][j].plant.stage==9)
+                        {
+                            world[i][j].plant.double_stage=0;
+                            world[i][j].type=tiles::melon;
+                        }
+                        else if (world[i][j].plant.stage==9 && world[i][j].type!=tiles::melon)
+                        {
+                            world[i][j].plant.double_stage++;
+                        }
                     }
-                }
-                // Wheat Growing
-                if (world[i][j].plant.type == tile_plants::wheat_crop)
-                {
-                    world[i][j].plant.stage++;
-                }
-                if (world[i][j].plant.stage > 9)
-                {
-                    world[i][j].plant.stage = 9;
-                    world[i][j].type = tiles::wheat;
-                }
-                // Corn growing
-                if (world[i][j].plant.type == tile_plants::corn)
-                {
-                    world[i][j].plant.stage++;
-                }
-                if (world[i][j].plant.stage > 9)
-                {
-                    world[i][j].plant.stage=9;
-                    world[i][j].type = tiles::corn;
-                }
-                // Cane growing
-                if (world[i][j].plant.type == tile_plants::cane)
-                {
-                    world[i][j].plant.stage++;
-                }
-                if (world[i][j].plant.stage == 10 && world[i][j].plant.type == tile_plants::cane)
-                {
-                    world[i][j].plant.stage=9;
-                    if (world[i][j].plant.double_stage > 5 && world[i][j].plant.stage == 9)
+                    // Wheat Growing
+                    if (world[i][j].plant.type == tile_plants::wheat_crop)
                     {
-                        world[i][j].plant.double_stage=0;
-                        world[i][j].type=tiles::cane;
+                        world[i][j].plant.stage++;
                     }
-                    else if (world[i][j].plant.stage==9 && world[i][j].type!=tiles::cane)
+                    if (world[i][j].plant.stage > 9)
                     {
-                        world[i][j].plant.double_stage++;
+                        world[i][j].plant.stage = 9;
+                        world[i][j].type = tiles::wheat;
                     }
+                    // Corn growing
+                    if (world[i][j].plant.type == tile_plants::corn)
+                    {
+                        world[i][j].plant.stage++;
+                    }
+                    if (world[i][j].plant.stage > 9)
+                    {
+                        world[i][j].plant.stage=9;
+                        world[i][j].type = tiles::corn;
+                    }
+                    // Cane growing
+                    if (world[i][j].plant.type == tile_plants::cane)
+                    {
+                        world[i][j].plant.stage++;
+                    }
+                    if (world[i][j].plant.stage == 10 && world[i][j].plant.type == tile_plants::cane)
+                    {
+                        world[i][j].plant.stage=9;
+                        if (world[i][j].plant.double_stage > 5 && world[i][j].plant.stage == 9)
+                        {
+                            world[i][j].plant.double_stage=0;
+                            world[i][j].type=tiles::cane;
+                        }
+                        else if (world[i][j].plant.stage==9 && world[i][j].type!=tiles::cane)
+                        {
+                            world[i][j].plant.double_stage++;
+                        }
+                    }
+                    world[i][j].plant.water--;
                 }
             }
         }
