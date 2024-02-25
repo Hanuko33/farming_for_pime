@@ -27,6 +27,8 @@ enum class items
     melon_seeds,
     corn,
     cane,
+    watering_can_with_water,
+    watering_can_without_water,
     // MUST be in the end
     ITEM_MAX
 };
@@ -39,6 +41,8 @@ const char * items_names [(int)items::ITEM_MAX]=
     "melon_seeds",
     "corn",
     "cane",
+    "watering can with water",
+    "watering can without water",
 };
 
 struct Player
@@ -106,7 +110,7 @@ int main()
                         printf("I");
                         break;
                     case tile_plants::corn:
-                        printf("|");
+                        printf("8");
                         break;
                     case tile_plants::melon_crop:
                         printf("r");
@@ -136,7 +140,7 @@ int main()
                         printf("w");
                         break;
                     case tiles::cane:
-                        printf("|");
+                        printf("I");
                         break;
                     case tiles::corn:
                         printf("8");
@@ -204,6 +208,16 @@ int main()
                     player.inventory[(int)items::wheat_seeds] += 1;
                 }
                 break;
+            case 'h':
+                printf("h - show this message\n");
+                printf("q - quit\n");
+                printf("p - plant\n");
+                printf("i - show inventory\n");
+                printf("b - break (harvest) crop\n");
+                printf("g - get watering can\n"); // TO DO
+                printf("r - refill watering can\n"); // TO DO
+                printf("w - water crop with watering can\n"); // TO DO
+                break;
             case 'q':
                 return 0;
             case 'p':
@@ -211,6 +225,10 @@ int main()
                 y = (getchar()-'0');
                 printf("\ny: ");
                 x = (getchar()-'0');
+                printf("m - melon\n");
+                printf("w - wheat\n");
+                printf("c - cane\n");
+                printf("C - corn\n");
                 printf("\ntype (m / w / c / C): ");
                 char type = getchar();
                 printf("\n%d %d\n", x, y);
