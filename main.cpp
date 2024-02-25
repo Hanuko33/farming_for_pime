@@ -227,14 +227,14 @@ int main()
                 if (world[y][x].type == tiles::cane)
                 {
                     world[y][x].type = tiles::farmland;
-                    player.inventory[(int)items::cane] += 1;
+                    player.inventory[(int)items::cane] += 5;
                 }
                 if (world[y][x].type == tiles::corn)
                 {
                     world[y][x].plant.type = tile_plants::none;
                     world[y][x].type = tiles::farmland;
                     world[y][x].plant.stage = 0;
-                    player.inventory[(int)items::corn] += 1;
+                    player.inventory[(int)items::corn] += 50;
                 }
                 break;
             case 'h':
