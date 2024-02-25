@@ -1,16 +1,19 @@
 #include <stdio.h>
 #include <termios.h>
-#define SIZE 2
+#define SIZE 3
 enum class tiles
 {
     farmland,
-    melon
+    melon,
+    wheat,
+    corn,
+    cane
 };
-
+// for now only melon and wheat works
 enum class tile_plants
 {
     none,
-    wheat,
+    wheat_crop,
     corn,
     melon_crop,
     cane
@@ -19,7 +22,9 @@ enum class tile_plants
 enum class items
 {
     wheat,
+    wheat_seeds,
     melon,
+    melon_seeds,
     corn,
     cane,
     // MUST be in the end
@@ -29,7 +34,9 @@ enum class items
 const char * items_names [(int)items::ITEM_MAX]=
 {
     "wheat",
+    "wheat_seeds",
     "melon",
+    "melon_seeds",
     "corn",
     "cane",
 };
@@ -56,7 +63,6 @@ typedef struct
 
 int main()
 {
-
     char input;
     world_obj world[SIZE][SIZE];
     for (int i=0; i<SIZE; i++)
@@ -69,6 +75,12 @@ int main()
             world[i][j].plant.double_stage = 0;
         }
     }
+
+    player.inventory[(int)items::melon_seeds] = 2;
+    player.inventory[(int)items::wheat_seeds] = 2;
+    player.inventory[(int)items::cane] = 2;
+    player.inventory[(int)items::corn] = 2;
+
     struct termios state, new_state;
     tcgetattr(0, &state);
     new_state=state;
@@ -79,6 +91,7 @@ int main()
     
     for (;;)
     {
+        printf("-----------------------------------------------\n");
         printf("\nPLANTS:\n");
         for (int i=0; i<SIZE; i++)
         {
@@ -87,7 +100,7 @@ int main()
                 switch (world[i][j].plant.type)
                 {
                     case tile_plants::none:
-                        printf(" ");
+                        printf("-");
                         break;
                     case tile_plants::cane:
                         printf("I");
@@ -98,7 +111,7 @@ int main()
                     case tile_plants::melon_crop:
                         printf("r");
                         break;
-                    case tile_plants::wheat:
+                    case tile_plants::wheat_crop:
                         printf("w");
                         break;
                 }
@@ -118,6 +131,16 @@ int main()
                         break;
                     case tiles::melon:
                         printf("#");
+                        break;
+                    case tiles::wheat:
+                        printf("w");
+                        break;
+                    case tiles::cane:
+                        printf("|");
+                        break;
+                    case tiles::corn:
+                        printf("8");
+                        break;
                 }
             }
             printf("\n");
@@ -157,26 +180,42 @@ int main()
                 break;
             case 'b':
                 printf("x: ");
-                x = (getchar()-'0');
-                printf("\ny: ");
                 y = (getchar()-'0');
+                printf("\ny: ");
+                x = (getchar()-'0');
+                printf("\n");
+                if (x >= SIZE || y >= SIZE || x < 0 || y < 0) 
+                {
+                    printf("\nNah, didn't break, too far away\n");
+                    break;
+                } 
                 if (world[x][y].type == tiles::melon)
                 {
                     world[x][y].type = tiles::farmland;
                     player.inventory[(int)items::melon] += 1;
+                    player.inventory[(int)items::melon_seeds] += 1;
+                }
+                if (world[x][y].type == tiles::wheat)
+                {
+                    world[x][y].plant.type = tile_plants::none;
+                    world[x][y].plant.stage = 0;
+                    world[x][y].type = tiles::farmland;
+                    player.inventory[(int)items::wheat] += 1;
+                    player.inventory[(int)items::wheat_seeds] += 1;
                 }
                 break;
             case 'q':
                 return 0;
             case 'p':
                 printf("x: ");
-                x = (getchar()-'0');
-                printf("\ny: ");
                 y = (getchar()-'0');
-                printf("\ntype (m): ");
+                printf("\ny: ");
+                x = (getchar()-'0');
+                printf("\ntype (m / w / c / C): ");
                 char type = getchar();
-                printf("%d %d\n", x, y);
-                if (x >= SIZE || y >= SIZE) 
+                printf("\n%d %d\n", x, y);
+                printf("\n");
+                if (x >= SIZE || y >= SIZE || y < 0 || x < 0) 
                 {
                     printf("\nNah, didn't plant, too far away\n");
                     break;
@@ -184,8 +223,39 @@ int main()
                 switch (type)
                 {
                     case 'm':
-                        world[x][y].plant.type = tile_plants::melon_crop;
+                        if (player.inventory[(int)items::melon_seeds])
+                        {   
+                            world[x][y].plant.type = tile_plants::melon_crop;
+                            player.inventory[(int)items::melon_seeds]--;
+                        }  
+                        else
+                            printf("Nah, didn't plant, no seeds\n");
                         break;
+                    case 'w':
+                        if (player.inventory[(int)items::wheat_seeds])
+                        {
+                            world[x][y].plant.type = tile_plants::wheat_crop;
+                            player.inventory[(int)items::wheat_seeds]--;
+                        }
+                        else
+                            printf("Nah, didn't plant, no seeds\n");
+                        break;
+                    case 'c':
+                        if (player.inventory[(int)items::cane])
+                        {
+                            world[x][y].plant.type = tile_plants::cane;
+                            player.inventory[(int)items::cane]--;
+                        }
+                        else
+                            printf("Nah, didn't plant, no seeds\n");
+                    case 'C':
+                        if (player.inventory[(int)items::corn])
+                        {
+                            world[x][y].plant.type = tile_plants::corn;
+                            player.inventory[(int)items::corn]--;
+                        }
+                        else
+                            printf("Nah, didn't plant, no seeds\n");
                 }
                 break;
         }
@@ -193,6 +263,7 @@ int main()
         {
             for (int j = 0; j < SIZE; j++)
             {
+                // Melon Growing
                 if (world[i][j].plant.type == tile_plants::melon_crop)
                 {
                     world[i][j].plant.stage++;
@@ -206,6 +277,44 @@ int main()
                         world[i][j].type=tiles::melon;
                     }
                     else if (world[i][j].plant.stage==9 && world[i][j].type!=tiles::melon)
+                    {
+                        world[i][j].plant.double_stage++;
+                    }
+                }
+                // Wheat Growing
+                if (world[i][j].plant.type == tile_plants::wheat_crop)
+                {
+                    world[i][j].plant.stage++;
+                }
+                if (world[i][j].plant.stage > 9)
+                {
+                    world[i][j].plant.stage = 9;
+                    world[i][j].type = tiles::wheat;
+                }
+                // Corn growing
+                if (world[i][j].plant.type == tile_plants::corn)
+                {
+                    world[i][j].plant.stage++;
+                }
+                if (world[i][j].plant.stage > 9)
+                {
+                    world[i][j].plant.stage=9;
+                    world[i][j].type = tiles::corn;
+                }
+                // Cane growing
+                if (world[i][j].plant.type == tile_plants::cane)
+                {
+                    world[i][j].plant.stage++;
+                }
+                if (world[i][j].plant.stage == 10 && world[i][j].plant.type == tile_plants::cane)
+                {
+                    world[i][j].plant.stage=9;
+                    if (world[i][j].plant.double_stage > 5 && world[i][j].plant.stage == 9)
+                    {
+                        world[i][j].plant.double_stage=0;
+                        world[i][j].type=tiles::cane;
+                    }
+                    else if (world[i][j].plant.stage==9 && world[i][j].type!=tiles::cane)
                     {
                         world[i][j].plant.double_stage++;
                     }
