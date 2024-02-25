@@ -287,7 +287,7 @@ int main()
                 x = (getchar()-'0');
                 printf("\ny: ");
                 y = (getchar()-'0');
-                printf("m - melon\n");
+                printf("\nm - melon\n");
                 printf("w - wheat\n");
                 printf("c - cane\n");
                 printf("C - corn\n");
