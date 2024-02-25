@@ -10,14 +10,23 @@ enum class tiles
     corn,
     cane
 };
-// for now only melon and wheat works
 enum class tile_plants
 {
     none,
     wheat_crop,
     corn,
     melon_crop,
-    cane
+    cane,
+    PLANT_MAX
+};
+
+int water_required[(int)tile_plants::PLANT_MAX]=
+{
+    0, // none
+    1, // wheat_crop
+    1, // corn
+    1, // melon_crop
+    5, // cane
 };
 
 enum class items
@@ -112,6 +121,7 @@ int main()
             {
                 switch (world[i][j].plant.type)
                 {
+                    case tile_plants::PLANT_MAX: break;
                     case tile_plants::none:
                         printf("-");
                         break;
@@ -136,7 +146,7 @@ int main()
         {
             for (int j=0; j<SIZE; j++)
             {
-                printf("%d", world[i][j].plant.water);
+                printf("%5d ", world[i][j].plant.water);
             }
             printf("\n");
         }
@@ -243,9 +253,13 @@ int main()
                 printf("p - plant\n");
                 printf("i - show inventory\n");
                 printf("b - break (harvest) crop\n");
-                printf("g - get watering can\n"); // TO DO
-                printf("r - refill watering can\n"); // TO DO
-                printf("w - water crop with watering can\n"); // TO DO
+                printf("g - get watering can\n"); 
+                printf("s - set watering can amount to 500\n"); 
+                printf("r - refill watering can\n"); 
+                printf("w - water crop with watering can\n"); 
+                break;
+            case 's':
+                player.inventory[(int)items::watering_can_with_water]=500;
                 break;
             case 'g':
                 player.inventory[(int)items::watering_can_with_water]++;
@@ -278,9 +292,10 @@ int main()
                     printf("\nNah, didn't water, you don't have watering can with water\n");
                     break;
                 }
-                world[y][x].plant.water=10;
+                world[y][x].plant.water+=10;
                 player.inventory[(int)items::watering_can_with_water]--;
                 player.inventory[(int)items::watering_can_without_water]++;
+                printf("\n");
                 break;
             case 'p':
                 printf("x: ");
@@ -345,7 +360,7 @@ int main()
         {
             for (int j = 0; j < SIZE; j++)
             {
-                if (world[i][j].plant.water)
+                if (world [i][j].plant.water >= water_required[(int)world[i][j].plant.type])
                 {
                     // Melon Growing
                     if (world[i][j].plant.type == tile_plants::melon_crop)
@@ -403,7 +418,7 @@ int main()
                             world[i][j].plant.double_stage++;
                         }
                     }
-                    world[i][j].plant.water--;
+                    if (world[i][j].plant.water) world[i][j].plant.water--;
                 }
             }
         }
