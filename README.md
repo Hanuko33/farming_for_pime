@@ -5,12 +5,13 @@
 ###### tui for now.
 
 #### keys
+wasd - select place
 h - show help message
 q - quit
 p - plant
 i - show inventory
 b - break (harvest) crop
 g - get watering can
-g - set watering can amount to 500
+S - set watering can amount to 500
 r - refill watering can
-w - water crop with watering can
+W - water crop with watering can
