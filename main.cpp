@@ -4,22 +4,22 @@
 #define SIZE 3
 enum class tiles
 {
-    farmland,
-    wheat,
-    corn,
-    melon,
-    cane,
+    farmland = '=',
+    wheat = 'W',
+    corn = '8',
+    melon = '#',
+    cane = 'I',
 };
 
 
-// tile_plants water_required, should be unified into a class
 enum class tile_plants
 {
-    none,
-    wheat,
-    corn,
-    melon,
-    cane,
+    none = '-',
+    wheat = 'w',
+    corn = '8',
+    melon = 'r',
+    cane = 'I',
+    // MUST be in the end
     PLANT_MAX
 };
 
@@ -32,7 +32,6 @@ int water_required[(int)tile_plants::PLANT_MAX]=
     5, // cane
 };
 
-// Would be cool if the same happened to items
 enum class items
 {
     wheat,
@@ -129,25 +128,7 @@ int main()
         {
             for (int j=0; j<SIZE; j++)
             {
-                switch (world[i][j].plant.type)
-                {
-                    case tile_plants::PLANT_MAX: break;
-                    case tile_plants::none:
-                        printf("-");
-                        break;
-                    case tile_plants::cane:
-                        printf("I");
-                        break;
-                    case tile_plants::corn:
-                        printf("8");
-                        break;
-                    case tile_plants::melon:
-                        printf("r");
-                        break;
-                    case tile_plants::wheat:
-                        printf("w");
-                        break;
-                }
+                printf("%c", (char)(world[i][j].plant.type));
             }
             printf("\n");
         }
@@ -166,24 +147,7 @@ int main()
         {
             for (int j=0; j<SIZE; j++)
             {
-                switch (world[i][j].type)
-                {
-                    case tiles::farmland:
-                        printf("=");
-                        break;
-                    case tiles::melon:
-                        printf("#");
-                        break;
-                    case tiles::wheat:
-                        printf("w");
-                        break;
-                    case tiles::cane:
-                        printf("I");
-                        break;
-                    case tiles::corn:
-                        printf("8");
-                        break;
-                }
+                printf("%c", (char)(world[i][j].type));
             }
             printf("\n");
         }
@@ -245,6 +209,7 @@ int main()
                     printf("%s: %d\n", items_names[i], player.inventory[i]);
                 }
                 break;
+                
             case 'b':
                 p = &world[player.y][player.x];
 
